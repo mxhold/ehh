@@ -31,6 +31,21 @@ RSpec.describe Ehh::Router do
       expect(route.call(request_env)).to eql([200, {}, ["max"]])
     end
 
-    xit "returns the default route if none match"
+    it "returns the default handler if none match" do
+      router = Ehh::Router.new
+      request_env = {"REQUEST_METHOD" => "GET", "PATH_INFO" => "/"}
+      route = router.recognize(request_env)
+      expect(route.call(request_env)).to eql([404, {}, ["404 Not Found\n"]])
+    end
+  end
+
+  describe "#default_handler=" do
+    it "allows specifying the handler that is used if no route matches" do
+      router = Ehh::Router.new
+      router.default_handler = -> (env) { [404, {}, ["#{env["PATH_INFO"]} not found!"]] }
+      request_env = {"REQUEST_METHOD" => "GET", "PATH_INFO" => "/foo"}
+      route = router.recognize(request_env)
+      expect(route.call(request_env)).to eql([404, {}, ["/foo not found!"]])
+    end
   end
 end

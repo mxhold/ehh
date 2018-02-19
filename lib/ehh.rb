@@ -3,8 +3,10 @@ require "rack"
 
 module Ehh
   class Router
+    attr_writer :default_handler
     def initialize
       @routes = []
+      @default_handler = -> (env) { [404, {}, ["404 Not Found\n"]] }
     end
 
     def register(method, pattern, handler)
@@ -12,7 +14,7 @@ module Ehh
     end
 
     def recognize(env)
-      @routes.find { |route| route.match?(env) }
+      @routes.find { |route| route.match?(env) } || @default_handler
     end
 
     class Route
