@@ -1,20 +1,26 @@
 require "ehh/version"
 require "rack"
+require "rack/utf8_sanitizer"
 
 module Ehh
   class Router
     attr_writer :default_handler
     def initialize
       @routes = []
-      @default_handler = -> (env) { [404, {}, ["404 Not Found\n"]] }
+      @default_handler = -> (request) { [404, {}, ["404 Not Found\n"]] }
     end
 
     def register(method, pattern, handler)
       @routes << Route.new(method, pattern, handler)
     end
 
-    def recognize(env)
-      @routes.find { |route| route.match?(env) } || @default_handler
+    def call(env)
+      request = Rack::Request.new(env)
+      _recognize(request).call(request)
+    end
+
+    def _recognize(request)
+      @routes.find { |route| route.match?(request) } || @default_handler
     end
 
     class Route
@@ -24,33 +30,31 @@ module Ehh
         @handler = handler
       end
 
-      def match?(env)
-        env["REQUEST_METHOD"] == @method && env["PATH_INFO"].match?(@pattern)
+      def match?(request)
+        request.request_method == @method && request.path_info.match?(@pattern)
       end
 
-      def call(env)
-        _set_params!(env)
-        @handler.call(env)
+      def call(request)
+        _set_params!(request)
+        @handler.call(request)
       end
 
-      def _set_params!(env)
+      def _set_params!(request)
         unless @pattern.named_captures.empty?
-          env["PATH_INFO"].match(@pattern).named_captures.each do |param, value|
-            env["router.params"] ||= {}
-            env["router.params"][param] = value
+          request.path_info.match(@pattern).named_captures.each do |param, value|
+            request.update_param(param, value)
           end
         end
       end
     end
   end
 
-  class Application
-    def initialize(router:)
-      @router = router
-    end
-
-    def call(env)
-      @router.recognize(env).call(env)
+  module Application
+    def self.build(router:)
+      Rack::Builder.app do
+        use Rack::UTF8Sanitizer
+        run router
+      end
     end
   end
 end

@@ -8,44 +8,42 @@ RSpec.describe Ehh::Router do
     end
   end
 
-  describe "#recognize" do
-    it "returns the first registered route that matches both method and path pattern" do
+  describe "#call" do
+    it "delegates to the handler from the first route that matches" do
       router = Ehh::Router.new
-      router.register("POST", %r(/), -> (_) { [1, {}, ["should not match (wrong method)"]] })
-      router.register("GET", %r(/), -> (_) { [2, {}, [""]] })
-      router.register("GET", %r(/), -> (_) { [3, {}, ["should not match (earlier route matches)"]] })
+      router.register("POST", %r(^/$), -> (_) { [1, {}, ["should not match (wrong method)"]] })
+      router.register("GET", %r(^/$), -> (_) { [2, {}, [""]] })
+      router.register("GET", %r(^/$), -> (_) { [3, {}, ["should not match (earlier route matches)"]] })
 
-      request_env = {"REQUEST_METHOD" => "GET", "PATH_INFO" => "/"}
-      route = router.recognize(request_env)
-      expect(route.call(request_env)).to eql([2, {}, [""]])
+      request_env = Rack::MockRequest.env_for("/")
+      expect(router.call(request_env)).to eql([2, {}, [""]])
     end
 
-    it "populates the request env with named captures" do
+    it "sets params from the named captures" do
       router = Ehh::Router.new
-      router.register("GET", %r(/users/(?<username>\w+)), -> (env) do
-        [200, {}, [env["router.params"]["username"]]]
+      router.register("GET", %r(^/users/(?<username>\w+)$), -> (request) do
+        [200, {}, [request.params["username"]]]
       end)
 
-      request_env = {"REQUEST_METHOD" => "GET", "PATH_INFO" => "/users/max"}
-      route = router.recognize(request_env)
-      expect(route.call(request_env)).to eql([200, {}, ["max"]])
+      request_env = Rack::MockRequest.env_for("/users/max")
+      expect(router.call(request_env)).to eql([200, {}, ["max"]])
     end
 
-    it "returns the default handler if none match" do
+    it "calls the default handler if no route matches" do
       router = Ehh::Router.new
-      request_env = {"REQUEST_METHOD" => "GET", "PATH_INFO" => "/"}
-      route = router.recognize(request_env)
-      expect(route.call(request_env)).to eql([404, {}, ["404 Not Found\n"]])
+      request_env = Rack::MockRequest.env_for("/")
+      expect(router.call(request_env)).to eql([404, {}, ["404 Not Found\n"]])
     end
   end
 
   describe "#default_handler=" do
     it "allows specifying the handler that is used if no route matches" do
       router = Ehh::Router.new
-      router.default_handler = -> (env) { [404, {}, ["#{env["PATH_INFO"]} not found!"]] }
-      request_env = {"REQUEST_METHOD" => "GET", "PATH_INFO" => "/foo"}
-      route = router.recognize(request_env)
-      expect(route.call(request_env)).to eql([404, {}, ["/foo not found!"]])
+      router.default_handler = -> (request) do
+        [404, {}, ["#{request.path} not found!"]]
+      end
+      request_env = Rack::MockRequest.env_for("/foo")
+      expect(router.call(request_env)).to eql([404, {}, ["/foo not found!"]])
     end
   end
 end
