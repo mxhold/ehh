@@ -6,8 +6,8 @@ RSpec.describe Ehh do
   end
 
   it "works as specified in the README" do
-    lock_file("../app.rb", "0d8539d88204705105124bb1e6041cfe", __FILE__, __LINE__)
-    code_example = File.readlines(File.join(__dir__, "..", "app.rb"))[2..23].join
+    lock_file("../config.ru", "9cc1176382265272587d57365d9d69aa", __FILE__, __LINE__)
+    code_example = File.readlines(File.join(__dir__, "..", "config.ru"))[2..23].join
     router = nil
     app = nil
     eval(code_example)

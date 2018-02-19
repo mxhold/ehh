@@ -5,6 +5,7 @@ Ehh is an experimental web microframework.
 ## Example
 
 ```ruby
+# config.ru
 require "ehh"
 
 module MyApp
@@ -29,7 +30,7 @@ router.register("GET", %r(/$), MyApp::Root.new)
 router.register("GET", %r(/users/(?<username>\w+)), MyApp::Users::Show.new)
 
 app = Ehh::Application.new(router: router)
-Rack::Handler::WEBrick.run app
+run app
 ```
 
 ## Components
