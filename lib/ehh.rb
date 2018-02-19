@@ -27,6 +27,11 @@ module Ehh
       end
 
       def call(env)
+        _set_params!(env)
+        @handler.call(env)
+      end
+
+      def _set_params!(env)
         named_captures = env["PATH_INFO"].match(@pattern).named_captures
         unless named_captures.empty?
           named_captures.each do |param, value|
@@ -34,7 +39,6 @@ module Ehh
             env["router.params"][param] = value
           end
         end
-        @handler.call(env)
       end
     end
   end
