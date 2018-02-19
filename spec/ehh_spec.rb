@@ -6,14 +6,10 @@ RSpec.describe Ehh do
   end
 
   it "works as specified in the README" do
-    router = Ehh::Router.new
-
-    router.register("GET", %r(/$), -> (_env) { [200, {}, ["Hello!\n"]] })
-    router.register("GET", %r(/users/(?<username>\w+)), -> (env) do
-      [200, {}, ["Hello, #{env["router.params"]["username"]}!\n"]]
-    end)
-
-    app = Ehh::Application.new(router: router)
+    code_example = File.readlines(File.join(__dir__, "..", "app.rb"))[2..23].join
+    router = nil
+    app = nil
+    eval(code_example)
 
     root_response = app.call({
       "REQUEST_METHOD" => "GET",
