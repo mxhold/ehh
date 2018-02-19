@@ -32,9 +32,8 @@ module Ehh
       end
 
       def _set_params!(env)
-        named_captures = env["PATH_INFO"].match(@pattern).named_captures
-        unless named_captures.empty?
-          named_captures.each do |param, value|
+        unless @pattern.named_captures.empty?
+          env["PATH_INFO"].match(@pattern).named_captures.each do |param, value|
             env["router.params"] ||= {}
             env["router.params"][param] = value
           end
