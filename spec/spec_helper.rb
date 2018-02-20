@@ -11,7 +11,7 @@ RSpec.configure do |config|
   end
 end
 
-def lock_file(relative_target_filepath, expected_digest, caller_file, caller_line)
+def lock_file(relative_target_filepath, expected_digest, caller_file)
   target_filepath = File.expand_path(
     File.join(caller_file, "..", relative_target_filepath)
   )
