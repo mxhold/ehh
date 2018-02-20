@@ -31,20 +31,23 @@ RSpec.describe Ehh::Router do
   end
 
   describe "#call" do
-    it "calls the handler from the first route that matches" do
+    it "calls the handler from the first route that matches method and pattern" do
       router = Ehh::Router.new
-      router.register("POST", %r(^/$), -> (_context, _request, response) do
+      router.register("POST", %r(^/foo$), -> (_context, _request, response) do
         response.status = 101
       end)
-      router.register("GET", %r(^/$), -> (_context, _request, response) do
+      router.register("GET", %r(^/bar$), -> (_context, _request, response) do
         response.status = 102
       end)
-      router.register("GET", %r(^/$), -> (_context, _request, response) do
+      router.register("GET", %r(^/foo$), -> (_context, _request, response) do
         response.status = 103
       end)
+      router.register("GET", %r(^/foo$), -> (_context, _request, response) do
+        response.status = 104
+      end)
 
-      mock_request(router, "/") do |status, _headers, _body|
-        expect(status).to eq(102)
+      mock_request(router, "/foo") do |status, _headers, _body|
+        expect(status).to eq(103)
       end
     end
 
