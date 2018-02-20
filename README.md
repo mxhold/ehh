@@ -19,14 +19,16 @@ $db.execute("CREATE UNIQUE INDEX IF NOT EXISTS posts_id ON posts (id)")
 
 module MyApp
   class Root
-    def call(request)
-      [200, {}, ["Hello!\n"]]
+    def call(request, response)
+      response.status = 200
+      response.set_header "Content-Type", "text/plain; charset=utf-8"
+      response.write "Hello!\n"
     end
   end
 
   module Posts
     class Create
-      def call(request)
+      def call(request, response)
         post_id = SecureRandom.uuid
         post_body = request.body.read
 
@@ -34,20 +36,26 @@ module MyApp
           "INSERT INTO posts (id, body) VALUES (?, ?)",
           [post_id, post_body]
         )
-        [201, {"Content-Type" => "text/plain; charset=utf-8"}, [request.base_url, "/", post_id]]
+        response.status = 201
+        response.set_header "Content-Type", "text/plain; charset=utf-8"
+        response.write "#{request.base_url}/#{post_id}"
       end
     end
 
     class Show
-      def call(request)
+      def call(request, response)
         post_id = request.params.fetch("post_id")
 
         post_body = $db.execute("SELECT body FROM posts WHERE id = ?", [post_id]).flatten.first
 
         if post_body
-          [200, {"Content-Type" => "text/plain; charset=utf-8"}, [post_body]]
+          response.status = 200
+          response.set_header "Content-Type", "text/plain; charset=utf-8"
+          response.write post_body
         else
-          [404, {"Content-Type" => "text/plain; charset=utf-8"}, ["Post not found\n"]]
+          response.status = 404
+          response.set_header "Content-Type", "text/plain; charset=utf-8"
+          response.write "Post not found\n"
         end
       end
     end

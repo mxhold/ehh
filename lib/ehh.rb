@@ -7,7 +7,11 @@ module Ehh
     attr_writer :default_handler
     def initialize
       @routes = []
-      @default_handler = -> (request) { [404, {}, ["404 Not Found\n"]] }
+      @default_handler = -> (request, response) do
+        response.status = 404
+        response.set_header "Content-Type", "text/plain; charset=utf-8"
+        response.write "404 Not Found\n"
+      end
     end
 
     def register(method, pattern, handler)
@@ -16,7 +20,9 @@ module Ehh
 
     def call(env)
       request = Rack::Request.new(env)
-      _recognize(request).call(request)
+      response = Rack::Response.new
+      _recognize(request).call(request, response)
+      response.finish
     end
 
     def _recognize(request)
@@ -34,9 +40,9 @@ module Ehh
         request.request_method == @method && request.path_info.match?(@pattern)
       end
 
-      def call(request)
+      def call(request, response)
         _set_params!(request)
-        @handler.call(request)
+        @handler.call(request, response)
       end
 
       def _set_params!(request)
