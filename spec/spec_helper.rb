@@ -17,6 +17,12 @@ def lock_file(relative_target_filepath, expected_digest, caller_file, caller_lin
   )
   actual_digest = Digest::MD5.file(target_filepath)
   unless actual_digest == expected_digest
+    target_file_relative_to_pwd = Pathname.new(target_filepath)
+      .relative_path_from(Pathname.new(Dir.pwd)).to_s
+
+    caller_file_relative_to_pwd = Pathname.new(caller_file)
+      .relative_path_from(Pathname.new(Dir.pwd)).to_s
+
     error_message = <<EOS
 Locked file has changed!
 
@@ -25,17 +31,16 @@ Expected digest: #{expected_digest}
 
 This exception is being raised to remind you that whenever you update this file:
 
-  #{target_filepath}
+  #{target_file_relative_to_pwd}
 
 you should consider the implications for this file:
 
-  #{caller_file}
+  #{caller_file_relative_to_pwd}
 
-Once you've considered the implications, re-lock by pasting:
+Once you've considered the implications, re-lock by running:
 
-  lock_file("#{relative_target_filepath}", "#{actual_digest}", __FILE__, __LINE__)
+  sed -i '' 's/#{expected_digest}/#{actual_digest}/' #{caller_file_relative_to_pwd}
 
-on #{caller_file}:#{caller_line}
 EOS
     fail RuntimeError, error_message
   end
