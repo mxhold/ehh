@@ -34,7 +34,7 @@ module MyApp
     def call(context, request, response)
       response.status = 200
       response.set_header "Content-Type", "text/plain; charset=utf-8"
-      response.write "Hello!\n"
+      response.write "curl #{request.base_url} -X POST -H 'Content-Type: text/plain' -d 'Hello, world!'\n"
     end
   end
 

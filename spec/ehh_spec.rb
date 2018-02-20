@@ -7,7 +7,7 @@ RSpec.describe Ehh do
 
   describe "README example" do
     it "works" do
-      lock_file("../config.ru", "1c09da2bc8100f562041df11659b086f", __FILE__)
+      lock_file("../config.ru", "77e6ffee38d15bd7b112707f69792418", __FILE__)
       code_example = File.readlines(File.join(__dir__, "..", "config.ru"))[1..-2].join
       app = nil
       eval(code_example)
@@ -15,7 +15,7 @@ RSpec.describe Ehh do
       mock_request(app, "/") do |status, headers, body|
         expect(status).to eq(200)
         expect(headers["Content-Type"]).to eq("text/plain; charset=utf-8")
-        expect(body).to eq("Hello!\n")
+        expect(body).to eq("curl http://example.org -X POST -H 'Content-Type: text/plain' -d 'Hello, world!'\n")
       end
 
       request_opts = {
