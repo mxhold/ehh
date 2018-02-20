@@ -10,8 +10,6 @@ require "ehh"
 require "securerandom"
 require "sqlite3"
 
-UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
-
 module MyApp
   class Repo
     def initialize
@@ -79,7 +77,7 @@ repo.setup
 router = Ehh::Router.new(context: { repo: repo })
 router.register("GET", %r(^/$), MyApp::Root.new)
 router.register("POST", %r(^/$), MyApp::Posts::Create.new)
-router.register("GET", %r(^/(?<post_id>#{UUID_PATTERN}$)), MyApp::Posts::Show.new)
+router.register("GET", %r(^/(?<post_id>[0-9a-f\-]+$)), MyApp::Posts::Show.new)
 
 app = Ehh::Application.build(router: router)
 

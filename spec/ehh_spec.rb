@@ -7,7 +7,7 @@ RSpec.describe Ehh do
 
   describe "README example" do
     it "works" do
-      lock_file("../config.ru", "8b369a8e4ac8ba7e8a90f33c2564f912", __FILE__, __LINE__)
+      lock_file("../config.ru", "1c09da2bc8100f562041df11659b086f", __FILE__, __LINE__)
       code_example = File.readlines(File.join(__dir__, "..", "config.ru"))[1..-2].join
       app = nil
       eval(code_example)
@@ -28,7 +28,7 @@ RSpec.describe Ehh do
       mock_request(app, "/", request_opts) do |status, headers, body|
         expect(status).to eq(201)
         expect(headers["Content-Type"]).to eq("text/plain; charset=utf-8")
-        expect(body).to match(%r(^http://example.org/#{UUID_PATTERN}$))
+        expect(body).to match(%r(^http://example.org/[0-9a-f\-]+$))
         created_post_url = body
       end
 
