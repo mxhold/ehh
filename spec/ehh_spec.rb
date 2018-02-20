@@ -37,6 +37,12 @@ RSpec.describe Ehh do
         expect(headers["Content-Type"]).to eq("text/plain; charset=utf-8")
         expect(body).to eq("Hello, world")
       end
+
+      mock_request(app, "/abc123") do |status, headers, body|
+        expect(status).to eq(404)
+        expect(headers["Content-Type"]).to eq("text/plain; charset=utf-8")
+        expect(body).to eq("Post not found\n")
+      end
     end
   end
 end
