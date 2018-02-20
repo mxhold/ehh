@@ -39,7 +39,7 @@ you should consider the implications for this file:
 
 Once you've considered the implications, re-lock by running:
 
-  sed -i '' 's/#{expected_digest}/#{actual_digest}/' #{caller_file_relative_to_pwd}
+sed -i '' 's/#{expected_digest}/#{actual_digest}/' #{caller_file_relative_to_pwd}
 
 EOS
     fail RuntimeError, error_message
@@ -53,4 +53,3 @@ def mock_request(app, *opts)
   body.each { |s| body_string << s }
   yield(status, headers, body_string)
 end
-
