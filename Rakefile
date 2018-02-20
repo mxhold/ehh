@@ -3,7 +3,7 @@ require "rspec/core/rake_task"
 
 RSpec::Core::RakeTask.new(:spec)
 
-task :default => [:spec, :readme]
+task :default => [:readme, :spec]
 
 desc "Build README.md from README.md.erb"
 task :readme do
