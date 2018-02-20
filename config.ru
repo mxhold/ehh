@@ -7,24 +7,20 @@ UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/
 module MyApp
   class Repo
     def initialize
-      @db ||= SQLite3::Database.new("db.sqlite3")
+      @db = SQLite3::Database.new("db.sqlite3")
     end
 
     def setup
-      _execute("CREATE TABLE IF NOT EXISTS posts (id TEXT, body BLOB)")
-      _execute("CREATE UNIQUE INDEX IF NOT EXISTS posts_id ON posts (id)")
+      @db.execute("CREATE TABLE IF NOT EXISTS posts (id TEXT, body BLOB)")
+      @db.execute("CREATE UNIQUE INDEX IF NOT EXISTS posts_id ON posts (id)")
     end
 
     def insert_post(id:, body:)
-      _execute("INSERT INTO posts (id, body) VALUES (?, ?)", [id, body])
+      @db.execute("INSERT INTO posts (id, body) VALUES (?, ?)", [id, body])
     end
 
     def fetch_post_body(id:)
-      _execute("SELECT body FROM posts WHERE id = ?", [id]).flatten.first
-    end
-
-    def _execute(*args)
-      @db.execute(*args)
+      @db.execute("SELECT body FROM posts WHERE id = ?", [id]).flatten.first
     end
   end
 

@@ -7,7 +7,7 @@ RSpec.describe Ehh do
 
   describe "README example" do
     it "works" do
-      lock_file("../config.ru", "5c4126b8337ed9ce13662d0bdd22f48b", __FILE__, __LINE__)
+      lock_file("../config.ru", "8b369a8e4ac8ba7e8a90f33c2564f912", __FILE__, __LINE__)
       code_example = File.readlines(File.join(__dir__, "..", "config.ru"))[1..-2].join
       app = nil
       eval(code_example)
