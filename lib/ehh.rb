@@ -5,12 +5,15 @@ require "rack/utf8_sanitizer"
 module Ehh
   class Router
     attr_writer :default_handler
-    def initialize
+    def initialize(context: {})
       @routes = []
-      @default_handler = -> (request, response) do
+      @default_handler = -> (_context, request, response) do
         response.status = 404
         response.set_header "Content-Type", "text/plain; charset=utf-8"
         response.write "404 Not Found\n"
+      end
+      unless context.empty?
+        @context = Struct.new(*context.keys).new(*context.values)
       end
     end
 
@@ -21,7 +24,7 @@ module Ehh
     def call(env)
       request = Rack::Request.new(env)
       response = Rack::Response.new
-      _recognize(request).call(request, response)
+      _recognize(request).call(@context, request, response)
       response.finish
     end
 
@@ -40,9 +43,9 @@ module Ehh
         request.request_method == @method && request.path_info.match?(@pattern)
       end
 
-      def call(request, response)
+      def call(context, request, response)
         _set_params!(request)
-        @handler.call(request, response)
+        @handler.call(context, request, response)
       end
 
       def _set_params!(request)

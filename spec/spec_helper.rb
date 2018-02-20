@@ -40,3 +40,12 @@ EOS
     fail RuntimeError, error_message
   end
 end
+
+def mock_request(app, *opts)
+  request_env = Rack::MockRequest.env_for(*opts)
+  status, headers, body = app.call(request_env)
+  body_string = ""
+  body.each { |s| body_string << s }
+  yield(status, headers, body_string)
+end
+

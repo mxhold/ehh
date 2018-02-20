@@ -7,42 +7,36 @@ RSpec.describe Ehh do
 
   describe "README example" do
     it "works" do
-#      lock_file("../config.ru", "dfeee297f7e1b2b276f81b6f49046c33", __FILE__, __LINE__)
+      lock_file("../config.ru", "5c4126b8337ed9ce13662d0bdd22f48b", __FILE__, __LINE__)
       code_example = File.readlines(File.join(__dir__, "..", "config.ru"))[1..-2].join
-      router = nil
       app = nil
       eval(code_example)
 
-      request_env = Rack::MockRequest.env_for("/")
-      status, headers, body = app.call(request_env)
-      expect(status).to eq(200)
-      expect(headers["Content-Type"]).to eq("text/plain; charset=utf-8")
-      body_string = ""
-      body.each { |s| body_string << s }
-      expect(body_string).to eq("Hello!\n")
+      mock_request(app, "/") do |status, headers, body|
+        expect(status).to eq(200)
+        expect(headers["Content-Type"]).to eq("text/plain; charset=utf-8")
+        expect(body).to eq("Hello!\n")
+      end
 
-      request_env = Rack::MockRequest.env_for(
-        "/",
-        {
+      request_opts = {
           method: :post,
           input: "Hello, world",
           "CONTENT_TYPE" => "text/plain",
-        },
-      )
-      status, headers, body = app.call(request_env)
-      expect(status).to eq(201)
-      expect(headers["Content-Type"]).to eq("text/plain; charset=utf-8")
-      body_string = ""
-      body.each { |s| body_string << s }
-      expect(body_string).to match(%r(^http://example.org/#{UUID_PATTERN}$))
+      }
+      created_post_url = nil
 
-      request_env = Rack::MockRequest.env_for(body_string)
-      status, headers, body = app.call(request_env)
-      expect(status).to eq(200)
-      expect(headers["Content-Type"]).to eq("text/plain; charset=utf-8")
-      body_string = ""
-      body.each { |s| body_string << s }
-      expect(body_string).to eq("Hello, world")
+      mock_request(app, "/", request_opts) do |status, headers, body|
+        expect(status).to eq(201)
+        expect(headers["Content-Type"]).to eq("text/plain; charset=utf-8")
+        expect(body).to match(%r(^http://example.org/#{UUID_PATTERN}$))
+        created_post_url = body
+      end
+
+      mock_request(app, created_post_url) do |status, headers, body|
+        expect(status).to eq(200)
+        expect(headers["Content-Type"]).to eq("text/plain; charset=utf-8")
+        expect(body).to eq("Hello, world")
+      end
     end
   end
 end
