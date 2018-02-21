@@ -18,7 +18,7 @@ module MyApp
     end
 
     def fetch_post_body(id:)
-      @db.execute("SELECT body FROM posts WHERE id = ?", [id]).flatten.first
+      @db.get_first_value("SELECT body FROM posts WHERE id = ?", [id])
     end
   end
 
