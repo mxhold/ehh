@@ -2,10 +2,10 @@
 
 Ehh is an experimental web microframework.
 
-## Example
+## Usage
 
+[examples/pastebin.ru](examples/pastebin.ru)
 ```ruby
-# config.ru
 require "ehh"
 require "securerandom"
 require "sqlite3"

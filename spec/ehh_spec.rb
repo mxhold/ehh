@@ -7,7 +7,7 @@ RSpec.describe Ehh do
 
   describe "README example" do
     it "works" do
-      code_example = File.readlines(File.join(__dir__, "..", "config.ru"))[1..-2].join
+      code_example = File.readlines(File.join(__dir__, "..", "examples", "pastebin.ru"))[1..-2].join
       app = nil
       eval(code_example)
 
